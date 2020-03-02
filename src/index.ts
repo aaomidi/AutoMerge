@@ -17,11 +17,14 @@ tools.command('merge', async (args, match) => {
     }
 
     const createCommentParams: Octokit.IssuesCreateCommentParams = {
-        owner: tools.context.repo.owner,
-        repo: tools.context.repo.repo,
+        ...tools.context.repo,
         issue_number: issueNumber,
         body: `Merging PR based on approval from @${senderName}`
     }
 
-    await tools.github.issues.createComment(createCommentParams)
-})
+    const result = await tools.github.issues.createComment(createCommentParams)
+
+    console.log(result);
+});
+
+console.log('Running...')

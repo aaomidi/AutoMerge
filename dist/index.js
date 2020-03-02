@@ -17011,14 +17011,11 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
     if (!issueNumber) {
         return tools.log.error('Issue number not defined.');
     }
-    const createCommentParams = {
-        owner: tools.context.repo.owner,
-        repo: tools.context.repo.repo,
-        issue_number: issueNumber,
-        body: `Merging PR based on approval from @${senderName}`
-    };
-    yield tools.github.issues.createComment(createCommentParams);
+    const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });
+    const result = yield tools.github.issues.createComment(createCommentParams);
+    console.log(result);
 }));
+console.log('Running...');
 //# sourceMappingURL=index.js.map
 
 /***/ }),
