@@ -2,7 +2,8 @@ import { Toolkit } from 'actions-toolkit';
 import { Octokit } from '@octokit/rest';
 
 const tools = new Toolkit({
-    event: 'issue_comment'
+    event: 'issue_comment',
+    secrets: ['GITHUB_TOKEN']
 });
 
 tools.command('merge', async (args, match) => {
