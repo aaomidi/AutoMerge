@@ -18,12 +18,19 @@ tools.command('merge', async (args, match) => {
             return tools.log.error('Issue number not defined.');
         }
 
-        const isMergedResponse = await tools.github.pulls.checkIfMerged({
-            ...tools.context.repo,
-            pull_number: issueNumber
-        });
+        let isMerged: boolean;
+        try {
+            const mergedResult = await tools.github.pulls.checkIfMerged({
+                ...tools.context.repo,
+                pull_number: issueNumber
+            });
+            isMerged = mergedResult.status === 204
+        } catch (ex) {
+            isMerged = false;
+        }
 
-        if (isMergedResponse.status !== 404) {
+
+        if (isMerged === true) {
             console.log('PR is already merged');
             return;
         }

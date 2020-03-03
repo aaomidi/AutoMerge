@@ -17013,8 +17013,15 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
         if (!issueNumber) {
             return tools.log.error('Issue number not defined.');
         }
-        const isMergedResponse = yield tools.github.pulls.checkIfMerged(Object.assign(Object.assign({}, tools.context.repo), { pull_number: issueNumber }));
-        if (isMergedResponse.status !== 404) {
+        let isMerged;
+        try {
+            const mergedResult = yield tools.github.pulls.checkIfMerged(Object.assign(Object.assign({}, tools.context.repo), { pull_number: issueNumber }));
+            isMerged = mergedResult.status === 204;
+        }
+        catch (ex) {
+            isMerged = false;
+        }
+        if (isMerged === true) {
             console.log('PR is already merged');
             return;
         }
