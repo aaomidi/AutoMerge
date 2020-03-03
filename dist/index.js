@@ -17003,10 +17003,15 @@ const tools = new actions_toolkit_1.Toolkit({
     event: 'issue_comment',
     secrets: ['GITHUB_TOKEN']
 });
+const labelToCheckFor = tools.inputs.label || 'Approved';
 tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const issue = tools.context.payload.issue;
+        if ((issue === null || issue === void 0 ? void 0 : issue.pull_request) === undefined) {
+            console.log('This command only works on pull requests');
+            return;
+        }
         const sender = tools.context.payload.sender;
         const senderName = (_a = sender === null || sender === void 0 ? void 0 : sender.login) !== null && _a !== void 0 ? _a : ' Unknown Sender';
         const issueNumber = issue === null || issue === void 0 ? void 0 : issue.number;
@@ -17023,6 +17028,14 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
         }
         if (isMerged === true) {
             console.log('PR is already merged');
+            return;
+        }
+        const labels = issue.labels || [];
+        const foundLabel = labels.find(l => l.name === labelToCheckFor);
+        if (foundLabel === undefined) {
+            console.log(`Label ${labelToCheckFor} must be applied`);
+            const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `The label ${labelToCheckFor} is required for using this command.` });
+            yield tools.github.issues.createComment(createCommentParams);
             return;
         }
         const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });
