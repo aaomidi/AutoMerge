@@ -17005,16 +17005,22 @@ const tools = new actions_toolkit_1.Toolkit({
 });
 tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const issue = tools.context.payload.issue;
-    const sender = tools.context.payload.sender;
-    const senderName = (_a = sender === null || sender === void 0 ? void 0 : sender.login) !== null && _a !== void 0 ? _a : ' Unknown Sender';
-    const issueNumber = issue === null || issue === void 0 ? void 0 : issue.number;
-    if (!issueNumber) {
-        return tools.log.error('Issue number not defined.');
+    try {
+        const issue = tools.context.payload.issue;
+        const sender = tools.context.payload.sender;
+        const senderName = (_a = sender === null || sender === void 0 ? void 0 : sender.login) !== null && _a !== void 0 ? _a : ' Unknown Sender';
+        const issueNumber = issue === null || issue === void 0 ? void 0 : issue.number;
+        if (!issueNumber) {
+            return tools.log.error('Issue number not defined.');
+        }
+        console.log(issue, sender, senderName, tools.context.repo);
+        const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });
+        const result = yield tools.github.issues.createComment(createCommentParams);
+        console.log(result);
     }
-    const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });
-    const result = yield tools.github.issues.createComment(createCommentParams);
-    console.log(result);
+    catch (ex) {
+        console.error(ex);
+    }
 }));
 console.log('Running...');
 //# sourceMappingURL=index.js.map
