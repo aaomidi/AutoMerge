@@ -17013,10 +17013,19 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
         if (!issueNumber) {
             return tools.log.error('Issue number not defined.');
         }
-        console.log(issue, sender, senderName, tools.context.repo);
+        const isMergedResponse = yield tools.github.pulls.checkIfMerged(Object.assign(Object.assign({}, tools.context.repo), { pull_number: issueNumber }));
+        if (isMergedResponse.status !== 404) {
+            console.log('PR is already merged');
+            return;
+        }
         const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });
-        const result = yield tools.github.issues.createComment(createCommentParams);
-        console.log(result);
+        const commentResult = yield tools.github.issues.createComment(createCommentParams);
+        if (commentResult.status !== 201) {
+            console.log('Comment not created');
+            return;
+        }
+        const mergeResult = yield tools.github.pulls.merge(Object.assign(Object.assign({}, tools.context.repo), { pull_number: issueNumber, merge_method: 'squash' }));
+        console.log(mergeResult);
     }
     catch (ex) {
         console.error(ex);

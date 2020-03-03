@@ -18,16 +18,35 @@ tools.command('merge', async (args, match) => {
             return tools.log.error('Issue number not defined.');
         }
 
-        console.log(issue, sender, senderName, tools.context.repo);
+        const isMergedResponse = await tools.github.pulls.checkIfMerged({
+            ...tools.context.repo,
+            pull_number: issueNumber
+        });
+
+        if (isMergedResponse.status !== 404) {
+            console.log('PR is already merged');
+            return;
+        }
+
         const createCommentParams: Octokit.IssuesCreateCommentParams = {
             ...tools.context.repo,
             issue_number: issueNumber,
             body: `Merging PR based on approval from @${senderName}`
         }
 
-        const result = await tools.github.issues.createComment(createCommentParams)
+        const commentResult = await tools.github.issues.createComment(createCommentParams);
 
-        console.log(result);
+        if (commentResult.status !== 201) {
+            console.log('Comment not created');
+            return;
+        }
+
+        const mergeResult = await tools.github.pulls.merge({
+            ...tools.context.repo,
+            pull_number: issueNumber,
+            merge_method: 'squash'
+        })
+        console.log(mergeResult);
     } catch (ex) {
         console.error(ex);
     }
