@@ -17004,6 +17004,7 @@ const tools = new actions_toolkit_1.Toolkit({
     secrets: ['GITHUB_TOKEN']
 });
 const labelToCheckFor = tools.inputs.label || 'Approved';
+const fileToCheckFor = tools.inputs.filePath || '.github/mergers.json';
 tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -17036,6 +17037,11 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
             console.log(`Label ${labelToCheckFor} must be applied`);
             const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `The label ${labelToCheckFor} is required for using this command.` });
             yield tools.github.issues.createComment(createCommentParams);
+            return;
+        }
+        const mergers = JSON.parse(tools.getFile(fileToCheckFor));
+        if (!mergers.includes(senderName)) {
+            console.log('Unrecognized user tried to merge!', senderName);
             return;
         }
         const createCommentParams = Object.assign(Object.assign({}, tools.context.repo), { issue_number: issueNumber, body: `Merging PR based on approval from @${senderName}` });

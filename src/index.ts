@@ -15,6 +15,8 @@ const tools = new Toolkit({
 
 const labelToCheckFor = tools.inputs.label || 'Approved';
 
+const fileToCheckFor = tools.inputs.filePath || '.github/mergers.json';
+
 
 tools.command('merge', async (args, match) => {
     try {
@@ -63,6 +65,13 @@ tools.command('merge', async (args, match) => {
                 body: `The label ${labelToCheckFor} is required for using this command.`
             }
             await tools.github.issues.createComment(createCommentParams);
+            return;
+        }
+
+        const mergers: string[] = JSON.parse(tools.getFile(fileToCheckFor));
+
+        if (!mergers.includes(senderName)) {
+            console.log('Unrecognized user tried to merge!', senderName);
             return;
         }
 
