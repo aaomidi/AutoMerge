@@ -53,6 +53,13 @@ tools.command('merge', async (args, match) => {
             return;
         }
 
+        const mergers: string[] = JSON.parse(tools.getFile(fileToCheckFor));
+
+        if (!mergers.includes(senderName)) {
+            console.log('Unrecognized user tried to merge!', senderName);
+            return;
+        }
+
         const labels: LabelDefinition[] = issue.labels || [];
 
         const foundLabel = labels.find(l => l.name === labelToCheckFor);
@@ -65,13 +72,6 @@ tools.command('merge', async (args, match) => {
                 body: `The label ${labelToCheckFor} is required for using this command.`
             }
             await tools.github.issues.createComment(createCommentParams);
-            return;
-        }
-
-        const mergers: string[] = JSON.parse(tools.getFile(fileToCheckFor));
-
-        if (!mergers.includes(senderName)) {
-            console.log('Unrecognized user tried to merge!', senderName);
             return;
         }
 
