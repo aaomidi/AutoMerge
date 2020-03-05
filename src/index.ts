@@ -15,7 +15,7 @@ const tools = new Toolkit({
 
 const labelToCheckFor = tools.inputs.label || 'Approved';
 
-const fileToCheckFor = tools.inputs.filePath || '.github/mergers.json';
+const fileToCheckFor = tools.inputs.filePath || './.github/mergers.json';
 
 
 tools.command('merge', async (args, match) => {
