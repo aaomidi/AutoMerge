@@ -7864,6 +7864,28 @@ const tools = new actions_toolkit_1.Toolkit({
 });
 const labelToCheckFor = tools.inputs.label || 'Approved';
 const fileToCheckFor = tools.inputs.filePath || './.github/mergers.json';
+const checkMerged = (repoContext, pullNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    let isMerged;
+    try {
+        const result = yield tools.github.pulls.checkIfMerged(Object.assign(Object.assign({}, repoContext), { pull_number: pullNumber }));
+        isMerged = result.status === 204;
+    }
+    catch (ex) {
+        isMerged = false;
+    }
+    return isMerged;
+});
+const checkCollabrator = (repoContext, username) => __awaiter(void 0, void 0, void 0, function* () {
+    let isCollabrator;
+    try {
+        const result = yield tools.github.repos.checkCollaborator(Object.assign(Object.assign({}, repoContext), { username }));
+        isCollabrator = result.status === 204;
+    }
+    catch (ex) {
+        isCollabrator = false;
+    }
+    return isCollabrator;
+});
 tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -7878,14 +7900,7 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
         if (!issueNumber) {
             return tools.log.error('Issue number not defined.');
         }
-        let isMerged;
-        try {
-            const mergedResult = yield tools.github.pulls.checkIfMerged(Object.assign(Object.assign({}, tools.context.repo), { pull_number: issueNumber }));
-            isMerged = mergedResult.status === 204;
-        }
-        catch (ex) {
-            isMerged = false;
-        }
+        const isMerged = yield checkMerged(tools.context.repo, issueNumber);
         if (isMerged === true) {
             console.log('PR is already merged');
             return;
@@ -7893,6 +7908,11 @@ tools.command('merge', (args, match) => __awaiter(void 0, void 0, void 0, functi
         const mergers = JSON.parse(tools.getFile(fileToCheckFor));
         if (!mergers.includes(senderName)) {
             console.log('Unrecognized user tried to merge!', senderName);
+            return;
+        }
+        const isCollabrator = yield checkCollabrator(tools.context.repo, senderName);
+        if (isCollabrator !== true) {
+            console.log('User is not a collabrator');
             return;
         }
         const labels = issue.labels || [];
